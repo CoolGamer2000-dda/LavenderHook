@@ -1,0 +1,66 @@
+#include "resource.h"
+#include <windows.h>
+#include <winver.h>
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,3,0
+ PRODUCTVERSION 1,0,3,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS VOS__WINDOWS32
+ FILETYPE VFT_DLL
+ BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904b0"
+    BEGIN
+      VALUE "CompanyName",      ""
+      VALUE "FileDescription",  "LavenderHook - QoL Automation Software\0"
+      VALUE "FileVersion",      "1.0.3\0"
+      VALUE "InternalName",     "LavenderHook.dll\0"
+      VALUE "OriginalFilename", "LavenderHook.dll\0"
+      VALUE "ProductName",      "LavenderHook\0"
+      VALUE "ProductVersion",   "1.0.3\0"
+      VALUE "LegalCopyright",   "Copyright (c) 2026 LichtAbzeichen8. Licensed under MIT.\0"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x0409, 1200
+  END
+ END
+
+DROP_LEFT   RCDATA "../images/DropLeft.png"
+DROP_DOWN   RCDATA "../images/DropDown.png"
+MENU_LOGO   RCDATA "../images/MenuLogo.png"
+
+EMPTY_ICO   RCDATA "../images/empty.png"
+
+ARROW_ICO   RCDATA "../images/arrow.png"
+DOTS_ICO    RCDATA "../images/dots.png"
+INFO_ICO    RCDATA "../images/info.png"
+MENU_ICO    RCDATA "../images/menu.png"
+SPARKLE_ICO RCDATA "../images/sparkle.png"
+SPEED_ICO   RCDATA "../images/speed.png"
+STAR_ICO    RCDATA "../images/star.png"
+SWORD_ICO   RCDATA "../images/sword.png"
+WRENCH_ICO  RCDATA "../images/wrench.png"
+ZAP_ICO     RCDATA "../images/zap.png"
+
+HALLOWEEN_GIRL	RCDATA "../images/HalloweenGirl.png"
+NECRO_GIRL		RCDATA "../images/NecroGirl.png"
+MOON_GIRL		RCDATA "../images/MoonGirl.png"
+SNOW_GIRL		RCDATA "../images/SnowGirl.png"
+CLOVER_GIRL		RCDATA "../images/CloverGirl.png"
+LOVE_GIRL		RCDATA "../images/LoveGirl.png"
+ORB_GIRL		RCDATA "../images/OrbGirl.png"
+OWL_GIRL		RCDATA "../images/OwlGirl.png"
+
+TOGGLE_ON    WAVE "../sounds/toggle_on.wav"
+TOGGLE_OFF   WAVE "../sounds/toggle_off.wav"
+STOP_ON_FAIL WAVE "../sounds/stop_on_fail.wav"
+HIDE_WINDOW  WAVE "../sounds/hide_window.wav"
