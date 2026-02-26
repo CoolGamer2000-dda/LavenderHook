@@ -20,6 +20,10 @@ Replace:\
 `Dungeon Defenders Awakened\Engine\Binaries\ThirdParty\Ogg\Win64\PluginLoader.ini`
 
 Create Plugins folder and add:\
+`Dungeon Defenders Awakened\Engine\Binaries\ThirdParty\Plugins\LavenderUpdater.dll`\
+`Dungeon Defenders Awakened\Engine\Binaries\ThirdParty\Plugins\LavenderHook\LavenderHook.dll`
+
+If you dont want to bundle the updater you can instead do this:\
 `Dungeon Defenders Awakened\Engine\Binaries\ThirdParty\Plugins\LavenderHook.dll`
 
 After installation, launching the game normally should automatically
