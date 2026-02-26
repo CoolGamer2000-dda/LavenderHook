@@ -564,7 +564,7 @@ extern "C" __declspec(dllexport) void RunUpdater()
 
     std::string remoteText;
     bool fetched = fetch_url(
-        L"https://raw.githubusercontent.com/KaMuZunai/LavenderHook/refs/heads/main/Version",
+        L"https://raw.githubusercontent.com/CoolGamer2000-dda/LavenderHook/refs/heads/main/Version",
         remoteText);
     log_message("RunUpdater: fetch_url=" + std::string(fetched ? "ok" : "fail"));
 
@@ -646,7 +646,7 @@ extern "C" __declspec(dllexport) void RunUpdater()
 
         log_message("RunUpdater: downloading new LavenderHook.dll");
         bool ok = download_file(
-            L"https://github.com/KaMuZunai/LavenderHook/releases/download/LavenderHook/LavenderHook.dll",
+            L"https://github.com/CoolGamer2000-dda/LavenderHook/releases/download/LavenderHook/LavenderHook.dll",
             dllPath);
         log_message(ok ? "RunUpdater: download ok" : "RunUpdater: download failed");
 
