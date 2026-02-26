@@ -1,5 +1,6 @@
 #include "logger.h"
 #include <windows.h>
+#include <shlobj.h>
 #include <fstream>
 #include <filesystem>
 #include <chrono>
@@ -9,7 +10,6 @@ static std::filesystem::path get_module_dir_for_logger()
 {
     wchar_t path[MAX_PATH];
     HMODULE hm = NULL;
-    // Cast function address to LPCWSTR to satisfy prototype; flag tells API this is an address
     GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, reinterpret_cast<LPCWSTR>(&get_module_dir_for_logger), &hm);
     if (hm)
     {
@@ -25,7 +25,25 @@ static std::filesystem::path get_module_dir_for_logger()
 
 void log_message(const std::string &msg)
 {
-    std::filesystem::path dir = get_module_dir_for_logger();
+    std::wstring wmsg(msg.begin(), msg.end());
+    OutputDebugStringW((wmsg + L"\r\n").c_str());
+
+    // Resolve %APPDATA%
+    wchar_t *p = nullptr;
+    std::filesystem::path dir;
+    if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &p)))
+    {
+        dir = std::filesystem::path(p) / L"LavenderHook" / L"LavenderUpdaterLogs";
+        CoTaskMemFree(p);
+    }
+    else
+    {
+        wchar_t env[MAX_PATH] = {};
+        GetEnvironmentVariableW(L"APPDATA", env, MAX_PATH);
+        dir = std::filesystem::path(env) / L"LavenderHook" / L"LavenderUpdaterLogs";
+    }
+    std::error_code ec;
+    std::filesystem::create_directories(dir, ec);
     std::filesystem::path logPath = dir / "updater.log";
 
     std::ofstream log(logPath, std::ios::app);

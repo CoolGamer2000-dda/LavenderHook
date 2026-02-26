@@ -33,6 +33,7 @@ target_link_libraries(LavenderHook
     User32
     Gdi32
     Dwmapi
+    Version
 )
 
 # Export settings

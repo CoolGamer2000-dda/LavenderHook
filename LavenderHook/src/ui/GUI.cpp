@@ -5,6 +5,8 @@
 #include "../assets/TextureLoader.h"
 #include "../assets/resources/resource.h"
 #include "../misc/SoundPlayer.h"
+#include <windows.h>
+#include <winver.h>
 
 #include <string>
 #include <vector>
@@ -73,13 +75,55 @@ static double g_lastTextureTry = 0.0;
 static LavenderHook::UI::LavenderFadeOut g_startup_fade;
 static double g_startup_show_start = -1.0;
 
-// Show the startup tooltip. Call this on startup to schedule the tooltip display.
+// Show the startup tooltip.
 void DisplayStartupToolTip()
 {
     g_startup_show_start = ImGui::GetTime();
     g_startup_fade.SetSpeed(4.0f);
-    // start hidden; RenderOverlay will enable visibility after a short delay
     g_startup_fade.SetVisible(false);
+}
+
+static std::string GetFileVersionString()
+{
+    static std::string s;
+    if (!s.empty()) return s;
+
+    HMODULE mod = nullptr;
+    GetModuleHandleExA(
+        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+        GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        (LPCSTR)&GetFileVersionString,
+        &mod
+    );
+
+    char path[MAX_PATH] = {0};
+    if (GetModuleFileNameA(mod, path, MAX_PATH) == 0)
+        return s;
+
+    DWORD dummy = 0;
+    DWORD size = GetFileVersionInfoSizeA(path, &dummy);
+    if (size == 0) return s;
+
+    std::vector<char> data(size);
+    if (!GetFileVersionInfoA(path, 0, size, data.data())) return s;
+
+    struct LANGANDCODEPAGE { WORD wLanguage; WORD wCodePage; } *trans = nullptr;
+    UINT transSize = 0;
+    if (VerQueryValueA(data.data(), "\\VarFileInfo\\Translation", (LPVOID*)&trans, &transSize) && transSize >= sizeof(LANGANDCODEPAGE)) {
+        char subblock[64] = {0};
+        sprintf_s(subblock, "\\StringFileInfo\\%04x%04x\\FileVersion", trans->wLanguage, trans->wCodePage);
+
+        LPSTR verBuf = nullptr;
+        UINT verSize = 0;
+        if (VerQueryValueA(data.data(), subblock, (LPVOID*)&verBuf, &verSize) && verBuf && verSize > 0) {
+            s.assign(verBuf, verSize);
+            // strip trailing nulls/spaces
+            while (!s.empty() && (s.back() == '\0' || s.back() == '\n' || s.back() == '\r')) s.pop_back();
+            return s;
+        }
+    }
+
+    return s;
 }
 
 extern bool LoadTheme();
@@ -365,18 +409,20 @@ void GUI::RenderOverlay()
             ImDrawList* fdl = ImGui::GetForegroundDrawList();
             ImVec2 ds = ImGui::GetIO().DisplaySize;
 
+            const std::string line0 = std::string("Version ") + (GetFileVersionString().empty() ? "Unknown" : GetFileVersionString());
             const std::string line1 = "Press \"Insert\" to Show/Hide menu.";
             const std::string line2 = "Press \"CTRL + F1\" to Show/Hide menu.";
             const std::string line3 = "Hold Right Click on buttons to see a Tooltip.";
 
+            ImVec2 s0 = ImGui::CalcTextSize(line0.c_str());
             ImVec2 s1 = ImGui::CalcTextSize(line1.c_str());
             ImVec2 s2 = ImGui::CalcTextSize(line2.c_str());
             ImVec2 s3 = ImGui::CalcTextSize(line3.c_str());
 
             const float pad = 12.0f;
             const float spacing = 6.0f;
-            float boxW = std::max(s1.x, std::max(s2.x, s3.x)) + pad * 2.0f;
-            float boxH = s1.y + s2.y + s3.y + spacing * 2.0f + pad * 2.0f;
+            float boxW = std::max(std::max(s0.x, s1.x), std::max(s2.x, s3.x)) + pad * 2.0f;
+            float boxH = s0.y + s1.y + s2.y + s3.y + spacing * 3.0f + pad * 2.0f;
 
             ImVec2 pos = ImVec2((ds.x - boxW) * 0.5f, (ds.y - boxH) * 0.5f);
             ImVec2 p0 = pos;
@@ -389,9 +435,10 @@ void GUI::RenderOverlay()
 
             ImVec2 textPos = ImVec2(pos.x + pad, pos.y + pad);
             ImU32 textCol = IM_COL32(255, 255, 255, (int)(230.0f * a));
-            fdl->AddText(ImGui::GetFont(), ImGui::GetFontSize(), textPos, textCol, line1.c_str());
-            fdl->AddText(ImGui::GetFont(), ImGui::GetFontSize(), ImVec2(textPos.x, textPos.y + s1.y + spacing), textCol, line2.c_str());
-            fdl->AddText(ImGui::GetFont(), ImGui::GetFontSize(), ImVec2(textPos.x, textPos.y + s1.y + s2.y + spacing * 2.0f), textCol, line3.c_str());
+            fdl->AddText(ImGui::GetFont(), ImGui::GetFontSize(), textPos, textCol, line0.c_str());
+            fdl->AddText(ImGui::GetFont(), ImGui::GetFontSize(), ImVec2(textPos.x, textPos.y + s0.y + spacing), textCol, line1.c_str());
+            fdl->AddText(ImGui::GetFont(), ImGui::GetFontSize(), ImVec2(textPos.x, textPos.y + s0.y + s1.y + spacing * 2.0f), textCol, line2.c_str());
+            fdl->AddText(ImGui::GetFont(), ImGui::GetFontSize(), ImVec2(textPos.x, textPos.y + s0.y + s1.y + s2.y + spacing * 3.0f), textCol, line3.c_str());
         }
     }
 

@@ -1,9 +1,15 @@
 
 cmake_minimum_required(VERSION 3.8)
-project(LavenderUpdater LANGUAGES CXX)
+project(LavenderUpdater LANGUAGES CXX RC)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources.rc.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/resources.rc"
+    @ONLY
+)
 
 set(SRC_FILES
   src/dllmain.cpp
@@ -11,14 +17,19 @@ set(SRC_FILES
   src/version_utils.cpp
   src/http_client.cpp
   src/logger.cpp
+  "${CMAKE_CURRENT_BINARY_DIR}/resources.rc"
+)
+
+set_source_files_properties(
+    "${CMAKE_CURRENT_BINARY_DIR}/resources.rc"
+    PROPERTIES COMPILE_FLAGS "/I\"${CMAKE_CURRENT_SOURCE_DIR}/src\""
 )
 
 add_library(LavenderUpdater SHARED ${SRC_FILES})
 
 if (WIN32)
-  target_link_libraries(LavenderUpdater PRIVATE winhttp)
+  target_link_libraries(LavenderUpdater PRIVATE winhttp dwmapi shell32 gdiplus)
 
-  # Try to link Version.lib if available (contains FileVersion APIs on Windows)
   find_library(VERSION_LIB NAMES Version)
   if (VERSION_LIB)
     target_link_libraries(LavenderUpdater PRIVATE ${VERSION_LIB})

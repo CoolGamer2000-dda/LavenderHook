@@ -1,0 +1,3 @@
+#include "resource.h"
+
+IDR_MENU_LOGO  PNG  "@CMAKE_SOURCE_DIR@/src/assets/MenuLogo.png"
