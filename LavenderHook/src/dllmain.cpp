@@ -77,8 +77,8 @@ DWORD WINAPI CheatEntry(HMODULE hModule)
     LavenderHook::LogMonitor::Start();
 
 end:
-    while (true)  // Placeholder
-//    while (!GetAsyncKeyState(VK_END))
+	while (true)  // Probably gonna remove this in the future entirely
+    // while (!GetAsyncKeyState(VK_END))
         Sleep(100);
 
     // Unhook DX/UI

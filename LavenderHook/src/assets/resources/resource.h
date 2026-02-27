@@ -35,4 +35,4 @@
 #define TOGGLE_ON		2001
 #define TOGGLE_OFF		2002
 #define STOP_ON_FAIL	2003
-#define HIDE_WINDOW		2004
+#define HIDE_NOTIF		2004

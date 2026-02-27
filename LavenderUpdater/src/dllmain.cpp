@@ -1,5 +1,5 @@
 #include <windows.h>
-#include "updater_core.h"
+#include "core/updater_core.h"
 
 static DWORD WINAPI UpdaterThreadProc(LPVOID)
 {
@@ -24,3 +24,4 @@ BOOL APIENTRY DllMain(HMODULE /*hModule*/, DWORD ul_reason_for_call, LPVOID /*lp
     }
     return TRUE;
 }
+ 

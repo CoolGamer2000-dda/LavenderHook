@@ -28,6 +28,7 @@ namespace LavenderHook {
             using LavenderHook::Input::HoldVK;
             using LavenderHook::Input::HoldState;
             using LavenderHook::Input::PressVK;
+            using LavenderHook::Input::PressUpVK;
             using LavenderHook::Input::AutomationAllowed;
             using LavenderHook::Input::TickEvery;
 
@@ -192,6 +193,7 @@ namespace LavenderHook {
 
                 if (!enabled) {
                     HoldVK(false, g_autoG_key_vk, hold);
+                    PressUpVK(g_autoG_key_vk);
                     holding = false;
                     phaseStart = {};
                     return;

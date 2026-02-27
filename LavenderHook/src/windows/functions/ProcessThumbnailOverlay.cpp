@@ -90,7 +90,11 @@ namespace LavenderHook {
             props.rcDestination         = dest;
             props.opacity               = 255;
 
-            DwmUpdateThumbnailProperties(g_thumbnail, &props);
+            if (FAILED(DwmUpdateThumbnailProperties(g_thumbnail, &props)))
+            {
+                DwmUnregisterThumbnail(g_thumbnail);
+                g_thumbnail = nullptr;
+            }
         }
 
         static void DrawTitleBar(HDC hdc, const RECT& cr)
@@ -325,12 +329,19 @@ namespace LavenderHook {
             UpdateWindow(hwnd);
 
             MSG m{};
-            while (GetMessageW(&m, nullptr, 0, 0) > 0)
+            BOOL bRet;
+            while ((bRet = GetMessageW(&m, nullptr, 0, 0)) != 0)
             {
+                if (bRet == -1)
+                {
+                    DestroyWindow(hwnd);
+                    break;
+                }
                 TranslateMessage(&m);
                 DispatchMessageW(&m);
             }
 
+            UnregisterClassW(kThumbnailClass, LavenderHook::Globals::dll_module);
             g_overlayHwnd = nullptr;
             return 0;
         }
@@ -366,14 +377,19 @@ namespace LavenderHook {
 
         void DestroyProcessOverlay()
         {
+            if (!g_overlayThread)
+                return;
+
+            for (int i = 0; i < 100 && !g_overlayHwnd; ++i)
+                Sleep(10);
+
             if (g_overlayHwnd)
                 PostMessageW(g_overlayHwnd, WM_CLOSE, 0, 0);
-            if (g_overlayThread)
-            {
-                WaitForSingleObject(g_overlayThread, 1000);
-                CloseHandle(g_overlayThread);
-                g_overlayThread = nullptr;
-            }
+
+            WaitForSingleObject(g_overlayThread, 5000);
+            CloseHandle(g_overlayThread);
+            g_overlayThread = nullptr;
+            g_overlayHwnd   = nullptr;
         }
 
     } // namespace UI

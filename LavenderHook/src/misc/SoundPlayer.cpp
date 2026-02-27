@@ -32,6 +32,19 @@ namespace LavenderHook {
         static SoundData s_failData;
         static SoundData s_hideData;
 
+        static void InitSoundFromData(const SoundData& data, ma_decoder* decoder, ma_sound* sound, bool& loaded)
+        {
+            if (data.raw.empty()) return;
+            ma_decoder_config dcfg = ma_decoder_config_init(ma_format_unknown, 0, 0);
+            if (ma_decoder_init_memory(data.raw.data(), data.raw.size(), &dcfg, decoder) == MA_SUCCESS) {
+                if (ma_sound_init_from_data_source(&s_engine, (ma_data_source*)decoder, MA_SOUND_FLAG_DECODE, NULL, sound) == MA_SUCCESS) {
+                    loaded = true;
+                } else {
+                    ma_decoder_uninit(decoder);
+                }
+            }
+        }
+
         static bool LoadWavFromResource(UINT id, SoundData& out)
         {
             HMODULE mod = NULL;
@@ -61,51 +74,12 @@ namespace LavenderHook {
             LoadWavFromResource(TOGGLE_ON, s_onData);
             LoadWavFromResource(TOGGLE_OFF, s_offData);
             LoadWavFromResource(STOP_ON_FAIL, s_failData);
-            LoadWavFromResource(HIDE_WINDOW, s_hideData);
+            LoadWavFromResource(HIDE_NOTIF, s_hideData);
 
-            if (!s_onData.raw.empty()) {
-                ma_decoder_config dcfg = ma_decoder_config_init(ma_format_unknown, 0, 0);
-                if (ma_decoder_init_memory(s_onData.raw.data(), s_onData.raw.size(), &dcfg, &s_decoderOn) == MA_SUCCESS) {
-                    if (ma_sound_init_from_data_source(&s_engine, (ma_data_source*)&s_decoderOn, MA_SOUND_FLAG_DECODE, NULL, &s_soundOn) == MA_SUCCESS) {
-                        s_onLoaded = true;
-                    } else {
-                        ma_decoder_uninit(&s_decoderOn);
-                    }
-                }
-            }
-
-            if (!s_offData.raw.empty()) {
-                ma_decoder_config dcfg = ma_decoder_config_init(ma_format_unknown, 0, 0);
-                if (ma_decoder_init_memory(s_offData.raw.data(), s_offData.raw.size(), &dcfg, &s_decoderOff) == MA_SUCCESS) {
-                    if (ma_sound_init_from_data_source(&s_engine, (ma_data_source*)&s_decoderOff, MA_SOUND_FLAG_DECODE, NULL, &s_soundOff) == MA_SUCCESS) {
-                        s_offLoaded = true;
-                    } else {
-                        ma_decoder_uninit(&s_decoderOff);
-                    }
-                }
-            }
-
-            if (!s_failData.raw.empty()) {
-                ma_decoder_config dcfg = ma_decoder_config_init(ma_format_unknown, 0, 0);
-                if (ma_decoder_init_memory(s_failData.raw.data(), s_failData.raw.size(), &dcfg, &s_decoderFail) == MA_SUCCESS) {
-                    if (ma_sound_init_from_data_source(&s_engine, (ma_data_source*)&s_decoderFail, MA_SOUND_FLAG_DECODE, NULL, &s_soundFail) == MA_SUCCESS) {
-                        s_failLoaded = true;
-                    } else {
-                        ma_decoder_uninit(&s_decoderFail);
-                    }
-                }
-            }
-
-            if (!s_hideData.raw.empty()) {
-                ma_decoder_config dcfg = ma_decoder_config_init(ma_format_unknown, 0, 0);
-                if (ma_decoder_init_memory(s_hideData.raw.data(), s_hideData.raw.size(), &dcfg, &s_decoderHide) == MA_SUCCESS) {
-                    if (ma_sound_init_from_data_source(&s_engine, (ma_data_source*)&s_decoderHide, MA_SOUND_FLAG_DECODE, NULL, &s_soundHide) == MA_SUCCESS) {
-                        s_hideLoaded = true;
-                    } else {
-                        ma_decoder_uninit(&s_decoderHide);
-                    }
-                }
-            }
+            InitSoundFromData(s_onData,   &s_decoderOn,   &s_soundOn,   s_onLoaded);
+            InitSoundFromData(s_offData,  &s_decoderOff,  &s_soundOff,  s_offLoaded);
+            InitSoundFromData(s_failData, &s_decoderFail, &s_soundFail, s_failLoaded);
+            InitSoundFromData(s_hideData, &s_decoderHide, &s_soundHide, s_hideLoaded);
 
             SetVolumePercent(LavenderHook::Globals::sound_volume);
         }
