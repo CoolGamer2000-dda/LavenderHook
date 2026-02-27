@@ -115,7 +115,8 @@ namespace LavenderHook {
 
             // Only move if sufficiently far from current pos
             const int moveThreshold = 3;
-            if (abs(wr.left - x) > moveThreshold || abs(wr.top - y) > moveThreshold) {
+            if (g_hiddenApplied &&
+                (abs(wr.left - x) > moveThreshold || abs(wr.top - y) > moveThreshold)) {
                 SetWindowPos(hwnd, HWND_TOP, x, y, w, h, SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_FRAMECHANGED);
             }
         }
@@ -363,9 +364,12 @@ namespace LavenderHook {
             if (!hwnd) return;
             if (!g_hiddenApplied) return;
 
+            // Clear the hidden flags before restoring the window position.
+            g_hiddenApplied = false;
+            LavenderHook::Globals::window_hidden = false;
+
             SetLayeredWindowAttributes(hwnd, 0, 255, LWA_ALPHA);
             SetWindowLong(hwnd, GWL_EXSTYLE, g_prevExStyle);
-            LavenderHook::Globals::window_hidden = false;
 
             {
                 int w = g_prevRect.right - g_prevRect.left;
@@ -385,7 +389,6 @@ namespace LavenderHook {
                 g_trayAdded = false;
             }
 
-            g_hiddenApplied = false;
             LavenderHook::UI::DestroyProcessOverlay();
 
             LavenderHook::Globals::minimize_auto_clear_requested = true;

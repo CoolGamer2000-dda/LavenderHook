@@ -13,10 +13,10 @@ configure_file(
 
 set(SRC_FILES
   src/dllmain.cpp
-  src/updater_core.cpp
-  src/version_utils.cpp
-  src/http_client.cpp
-  src/logger.cpp
+  "src/core/updater_core.cpp"
+  "src/misc/version_utils.cpp"
+  "src/misc/http_client.cpp"
+  "src/logger/logger.cpp"
   "${CMAKE_CURRENT_BINARY_DIR}/resources.rc"
 )
 

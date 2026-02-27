@@ -28,6 +28,7 @@ namespace LavenderHook {
             using LavenderHook::Input::HoldVK;
             using LavenderHook::Input::HoldState;
             using LavenderHook::Input::PressVK;
+            using LavenderHook::Input::PressUpVK;
             using LavenderHook::Input::AutomationAllowed;
             using LavenderHook::Input::TickEvery;
 
@@ -187,11 +188,16 @@ namespace LavenderHook {
                 LoadOnce();
 
                 static HoldState hold;
+                static int hold_vk = 0;
                 static steady_clock::time_point phaseStart{};
                 static bool holding = false;
 
                 if (!enabled) {
-                    HoldVK(false, g_autoG_key_vk, hold);
+                    if (hold_vk != 0) {
+                        HoldVK(false, hold_vk, hold);
+                        PressUpVK(hold_vk);
+                        hold_vk = 0;
+                    }
                     holding = false;
                     phaseStart = {};
                     return;
@@ -202,13 +208,20 @@ namespace LavenderHook {
                     if (phaseStart.time_since_epoch().count() == 0) {
                     phaseStart = now;
                     holding = true;
-                        HoldVK(true, g_autoG_key_vk, hold);
+                        if (hold_vk != 0 && hold_vk != g_autoG_key_vk) {
+                            HoldVK(false, hold_vk, hold);
+                            PressUpVK(hold_vk);
+                        }
+                        hold_vk = g_autoG_key_vk;
+                        HoldVK(true, hold_vk, hold);
                     return;
                 }
 
                 if (holding) {
                     if ((now - phaseStart) >= milliseconds(g_autoG_hold_ms)) {
-                        HoldVK(false, g_autoG_key_vk, hold);
+                        HoldVK(false, hold_vk != 0 ? hold_vk : g_autoG_key_vk, hold);
+                        PressUpVK(hold_vk != 0 ? hold_vk : g_autoG_key_vk);
+                        hold_vk = 0;
                         holding = false;
                         phaseStart = now;
                     }
@@ -217,7 +230,12 @@ namespace LavenderHook {
                     if ((now - phaseStart) >= milliseconds(g_autoG_delay_ms)) {
                         holding = true;
                         phaseStart = now;
-                        HoldVK(true, g_autoG_key_vk, hold);
+                        if (hold_vk != 0 && hold_vk != g_autoG_key_vk) {
+                            HoldVK(false, hold_vk, hold);
+                            PressUpVK(hold_vk);
+                        }
+                        hold_vk = g_autoG_key_vk;
+                        HoldVK(true, hold_vk, hold);
                     }
                 }
             }

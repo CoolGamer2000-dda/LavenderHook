@@ -81,8 +81,6 @@ static inline bool IsInputMessage(UINT msg) {
 LRESULT CALLBACK LavenderHook::Hooks::WndProc::HookedWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
     // Toggle menu on Insert OR Ctrl + F1
-	// TODO: make configurable
-    // TODO: add unhook / remove button
     if (msg == WM_KEYDOWN &&
         (wparam == VK_INSERT ||
          (wparam == VK_F1 && (GetAsyncKeyState(VK_CONTROL) & 0x8000))))
@@ -92,6 +90,13 @@ LRESULT CALLBACK LavenderHook::Hooks::WndProc::HookedWndProc(HWND hwnd, UINT msg
     }
 
     if (LavenderHook::Globals::show_menu) {
+        // Fix End Key scuffing the UI
+        if ((msg == WM_KEYDOWN || msg == WM_KEYUP || msg == WM_SYSKEYDOWN || msg == WM_SYSKEYUP) &&
+            wparam == VK_END)
+        {
+            return 1;
+        }
+
         if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam))
             return 1;
 
